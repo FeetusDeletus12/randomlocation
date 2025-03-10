@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Location Finder</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Replace 'YOUR_API_KEY' with your actual API key -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAl0PAu3KHHiMcftfOHisf17jyYP3WWCck&libraries=places"></script>
 </head>
 <body>
@@ -68,6 +67,7 @@
 
 <script>
     let map;
+    let markers = [];  // Array to store markers
 
     function initMap(lat = 0, lng = 0) {
         map = new google.maps.Map(document.getElementById("map"), {
@@ -81,6 +81,14 @@
         const input = document.getElementById("countryInput");
         const autocomplete = new google.maps.places.Autocomplete(input, { types: ['(regions)'] });
     });
+
+    function clearMarkers() {
+        // Remove all markers from the map
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];  // Reset markers array
+    }
 
     function getRandomLocation() {
         const input = document.getElementById("countryInput").value;
@@ -99,9 +107,19 @@
                 const bounds = data[0].boundingbox.map(Number);
                 const lat = Math.random() * (bounds[1] - bounds[0]) + bounds[0];
                 const lng = Math.random() * (bounds[3] - bounds[2]) + bounds[2];
-                
+
+                // Clear previous markers
+                clearMarkers();
+
+                // Set new center and add a new marker
                 map.setCenter({ lat, lng });
-                new google.maps.Marker({ position: { lat, lng }, map });
+                const marker = new google.maps.Marker({
+                    position: { lat, lng },
+                    map,
+                });
+
+                // Add the new marker to the markers array
+                markers.push(marker);
             })
             .catch(error => console.error("Error fetching location:", error));
     }
