@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Location Finder</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAl0PAu3KHHiMcftfOHisf17jyYP3WWCck&libraries=places"></script>
+    <!-- Include HERE Maps API -->
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
 </head>
 <body>
     <div class="container">
@@ -68,31 +71,35 @@
 <script>
     let map;
     let markers = [];  // Array to store markers
+    let platform = new H.service.Platform({
+        'apikey': 'PtOmt4UEt4QCX1LdTtdzWMQGRROlURSH4Pi-8pt9B_E'  // Replace with your actual HERE API key
+    });
+    let defaultLayers = platform.createDefaultLayers();
 
+    // Initialize the map with HERE Maps
     function initMap(lat = 0, lng = 0) {
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat, lng },
-            zoom: 5,
+        map = new H.Map(document.getElementById("map"), defaultLayers.vector.normal.map, {
+            center: { lat: lat, lng: lng },
+            zoom: 5
         });
+
+        // Add interaction and UI
+        let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+        let ui = H.ui.UI.createDefault(map, defaultLayers);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
         initMap();
         const input = document.getElementById("countryInput");
 
-        // Autocomplete setup for countries only
-        const options = {
-            types: ['(regions)'],  // Restrict to regions like countries
-            componentRestrictions: { country: 'global' } // Optionally, you can specify a default country (use 'global' for worldwide)
-        };
-
-        const autocomplete = new google.maps.places.Autocomplete(input, options);
+        // Autocomplete setup for countries only (using a list or external API for country suggestions)
+        // Implement your own logic to filter to countries or use HERE's suggestion services
     });
 
     function clearMarkers() {
         // Remove all markers from the map
         for (let i = 0; i < markers.length; i++) {
-            markers[i].setMap(null);
+            map.removeObject(markers[i]);
         }
         markers = [];  // Reset markers array
     }
@@ -103,7 +110,7 @@
             alert("Please enter a country.");
             return;
         }
-        
+
         fetch(`https://nominatim.openstreetmap.org/search?country=${input}&format=json&limit=1`)
             .then(response => response.json())
             .then(data => {
@@ -118,12 +125,12 @@
                 // Clear previous markers
                 clearMarkers();
 
-                // Set new center and add a new marker
-                map.setCenter({ lat, lng });
-                const marker = new google.maps.Marker({
-                    position: { lat, lng },
-                    map,
-                });
+                // Set new center and add a new marker with HERE Maps
+                map.setCenter({ lat: lat, lng: lng });
+
+                // Create and add a marker to the map
+                let marker = new H.map.Marker({ lat: lat, lng: lng });
+                map.addObject(marker);
 
                 // Add the new marker to the markers array
                 markers.push(marker);
