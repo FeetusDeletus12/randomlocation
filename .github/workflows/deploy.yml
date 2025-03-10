@@ -1,0 +1,22 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main  # This triggers the action when you push code to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # This specifies that the workflow will run on Ubuntu
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # This gets the latest code
+
+      - name: Set up Google API key
+        run: echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV  # Set the API key
+
+      - name: Deploy to production
+        run: |
+          echo "Using API Key: $GOOGLE_API_KEY"
+          # Replace with actual deployment commands
