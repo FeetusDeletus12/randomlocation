@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Location Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Random Location Finder</h1>
+        <input type="text" id="countryInput" placeholder="Enter a country">
+        <button onclick="getRandomLocation()">Find Random Location</button>
+        <div id="map"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 50px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input {
+        width: 80%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    #map {
+        width: 100%;
+        height: 400px;
+        margin-top: 20px;
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+    let map;
+
+    function initMap(lat = 0, lng = 0) {
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat, lng },
+            zoom: 5,
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initMap();
+        const input = document.getElementById("countryInput");
+        const autocomplete = new google.maps.places.Autocomplete(input, { types: ['(regions)'] });
+    });
+
+    function getRandomLocation() {
+        const input = document.getElementById("countryInput").value;
+        if (!input) {
+            alert("Please enter a country.");
+            return;
+        }
+        
+        fetch(`https://nominatim.openstreetmap.org/search?country=${input}&format=json&limit=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    alert("Invalid country name.");
+                    return;
+                }
+                const bounds = data[0].boundingbox.map(Number);
+                const lat = Math.random() * (bounds[1] - bounds[0]) + bounds[0];
+                const lng = Math.random() * (bounds[3] - bounds[2]) + bounds[2];
+                
+                map.setCenter({ lat, lng });
+                new google.maps.Marker({ position: { lat, lng }, map });
+            })
+            .catch(error => console.error("Error fetching location:", error));
+    }
+</script>
