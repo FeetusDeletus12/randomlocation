@@ -79,7 +79,14 @@
     document.addEventListener("DOMContentLoaded", () => {
         initMap();
         const input = document.getElementById("countryInput");
-        const autocomplete = new google.maps.places.Autocomplete(input, { types: ['(regions)'] });
+
+        // Autocomplete setup for countries only
+        const options = {
+            types: ['(regions)'],  // Restrict to regions like countries
+            componentRestrictions: { country: 'global' } // Optionally, you can specify a default country (use 'global' for worldwide)
+        };
+
+        const autocomplete = new google.maps.places.Autocomplete(input, options);
     });
 
     function clearMarkers() {
